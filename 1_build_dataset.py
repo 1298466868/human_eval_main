@@ -2,7 +2,7 @@ import json
 import subprocess
 import tiktoken
 from openai import OpenAI
-from evalplus.data import get_human_eval
+from evalplus.data import get_human_eval_plus
 from tqdm import tqdm
 
 client = OpenAI(
@@ -86,6 +86,6 @@ You must provide exactly these three fields in your JSON output:
     print(f"Phase 1 完成，共生成 {len(dataset)} 条高标准对抗数据。")
 
 if __name__ == "__main__":
-    evalplus_dataset = list(get_human_eval().values())
+    evalplus_dataset = list(get_human_eval_plus().values())
     evalplus_dataset = sorted(evalplus_dataset, key=lambda x: int(x["task_id"].split("/")[-1]))
     build_dataset(evalplus_dataset, max_items=164)
