@@ -1,6 +1,7 @@
 import json
 import subprocess
 import tiktoken
+import uuid
 from openai import OpenAI
 from evalplus.data import get_human_eval_plus
 from tqdm import tqdm
@@ -16,8 +17,9 @@ def count_tokens(text):
     return len(tokenizer.encode(text))
 
 def run_sandbox(code):
+    container_name = f"sandbox_{uuid.uuid4().hex}"
     try:
-        cmd = ["docker", "run", "-i", "--rm", "--memory=256m", "python:3.10-slim", "python", "-"]
+        cmd = ["docker", "run", "-i", "--rm", "--name", container_name, "--memory=256m", "python:3.10-slim", "python", "-"]
         res = subprocess.run(
             cmd, 
             input=code,           
@@ -27,29 +29,29 @@ def run_sandbox(code):
         )
         return res.returncode == 0
     except subprocess.TimeoutExpired:
+        subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
         return False
     except Exception: 
+        subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
         return False
 
 def build_dataset(problems, max_items=164):
     dataset = []
     print(f"开始使用 {MODEL_NAME} 构造高难度对抗数据集...")
   
-    # 【核心修改】：将其转变为结构清晰、指令强烈的专业英文 System Prompt
     sys_msg = """You are a senior software security testing expert and Python architect. You must strictly output in JSON format.
 To evaluate code comprehension models, please design an independent [pre-requisite helper function] related to the provided target problem context. (Note: Do NOT solve the original problem itself; write a relevant standalone utility function).
 
 You must provide exactly these three fields in your JSON output:
 1. 'clean_code': A clean Python helper function with clear logic, optimal control flow, and strict PEP8 compliance.
 2. 'dirty_code': Functionally strictly equivalent to `clean_code`, but intentionally severely obfuscated to maximize its Cyclomatic Complexity and minimize readability.
-   - Required strategies: extremely deep and meaningless if/else nesting, dead code branches that are never triggered (e.g., complex variants of `if False`), redundant intermediate variable type conversions, completely unnecessary for/while loops, and other similar obfuscation techniques.
+   - Required strategies: extremely deep and meaningless if/else nesting, dead code branches that are never triggered, redundant intermediate variable type conversions, completely unnecessary for/while loops, and other similar obfuscation techniques.
    - Hard Constraints: It must NEVER change the final output result. It must NEVER raise exceptions.
 3. 'test_cases': At least 3 Python assertion statements (format: `assert helper_function(input) == output`). These tests MUST pass successfully for both `clean_code` and `dirty_code`."""
 
     for prob in tqdm(problems[:max_items]):
         for attempt in range(5):
             temp = 0.4 + (attempt * 0.2)
-            # 【核心修改】：英文 User Prompt
             user_msg = f"Original Task Context:\n{prob['prompt']}\n\nBased on this scenario, please construct the pair of clean_code and dirty_code, and output the required JSON."
           
             try:
