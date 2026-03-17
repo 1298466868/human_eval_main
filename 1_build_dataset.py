@@ -6,7 +6,10 @@ from openai import OpenAI
 from evalplus.data import get_human_eval
 from tqdm import tqdm
 
-client = OpenAI(api_key="0000") # 记得替换
+client = OpenAI(
+    api_key="sk-你的国内中转Key", 
+    base_url="https://中转商提供的地址/v1"  # 必须加上 base_url，注意结尾通常有 /v1
+)
 MODEL_NAME = "gpt-4o"
 tokenizer = tiktoken.encoding_for_model("gpt-4o")
 
