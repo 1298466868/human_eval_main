@@ -17,7 +17,7 @@ def count_tokens(text):
 
 def run_sandbox(code):
     try:
-        cmd = ["docker", "run", "-i", "--rm", "--memory=256m", "python:3.9-slim", "python", "-"]
+        cmd = ["docker", "run", "-i", "--rm", "--memory=256m", "python:3.10-slim", "python", "-"]
         res = subprocess.run(
             cmd, 
             input=code,           
