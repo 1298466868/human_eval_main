@@ -7,17 +7,18 @@ import os
 
 MODELS_CONFIG = {
     "gpt-4o-mini": {
-        "client": OpenAI(api_key="sk-你的OpenAI_Key"),
-        "model_name": "gpt-4o-mini"   # 必须保持一致
+        "client": OpenAI(api_key="sk-你购买的国内中转Key", base_url="https://中转商给你的具体地址/v1" ),
+        "model_name": "gpt-4o-mini"
     },
     "Qwen2.5-Coder-32B": {
-        "client": OpenAI(api_key="sk-你的开源模型平台Key", base_url="https://api.siliconflow.cn/v1"),
+        "client": OpenAI(api_key="sk-你的开源平台Key", base_url="https://api.siliconflow.cn/v1"),
         "model_name": "Qwen/Qwen2.5-Coder-32B-Instruct" 
     },
     "Llama-3-8B-Instruct": {
-        "client": OpenAI(api_key="sk-你的开源模型平台Key", base_url="https://api.siliconflow.cn/v1"),
+        "client": OpenAI(api_key="sk-你的开源平台Key", base_url="https://api.siliconflow.cn/v1"),
         "model_name": "meta-llama/Meta-Llama-3-8B-Instruct"
     }
+}
 
 def extract_code(text):
     """【科研级修复】：支持大小写忽略、忽略前导空格的鲁棒提取"""
