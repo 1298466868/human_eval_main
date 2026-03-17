@@ -48,7 +48,7 @@ def generate_with_retry(client, model, prompt, num_samples=10, max_retries=5):
                     max_tokens=1024,
                     timeout=30       # 单次调用的超时设为 30s
                 )
-                sample_code = extract_code(res.choices.message.content)
+                sample_code = extract_code(res.choices[0].message.content)
                 break # 成功拿到一个样本，跳出重试循环
             except Exception as e:
                 wait_time = 2 ** attempt
